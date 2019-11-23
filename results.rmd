@@ -5,22 +5,151 @@ date: "11/23/2019"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
 ```
 
 ## Read the data from Matlab script output
 
 ```{r}
-
+# SC and IC parameter estimates (before adding visual property regressors to the model)
+library(R.matlab)
+data <- readMat('Analysis4_fullmaskcolliculi_hd_output_newbetas_aug15.mat') # a list of 16 variables
+neu_colnum <- 1 # the first column is neutral condition betas
+aver_colnum <- 4 # the fourth column is aversive condition betas
+leftICneu <- data[[1]][,neu_colnum] # parameter estimates for 11 subjects; left IC neutral
+leftICaver <- data[[1]][,aver_colnum]
+leftSCneu <- data[[5]][,neu_colnum] # lists 2-4 are some stats that are irrelevant here
+leftSCaver <- data[[5]][,aver_colnum]
+rightICneu <- data[[9]][,neu_colnum]
+rightICaver <- data[[9]][,aver_colnum]
+rightSCneu <- data[[13]][,neu_colnum]
+rightSCaver <- data[[13]][,aver_colnum]
+betas <- c(leftSCneu,leftSCaver,leftICneu,leftICaver,rightSCneu,rightSCaver,rightICneu,rightICaver)
+subjects <- c(rep(1:11, times = 8))
+laterality <- c(rep('Left', times = 44), rep('Right', times = 44))
+stimulus_type <- c(rep('Neutral', times = 11), rep('Aversive', times = 11), rep('Neutral', times = 11), rep('Aversive', times = 11), rep('Neutral', times = 11), rep('Aversive', times = 11), rep('Neutral', times = 11), rep('Aversive', times = 11))
+superior_inferior <- c(rep('Superior Colliculi', times = 22), rep('Inferior Colliculi', times = 22), rep('Superior Colliculi', times = 22), rep('Inferior Colliculi', times = 22))
+fullmaskdata <- data.frame(subjects, betas, laterality, stimulus_type, superior_inferior)
 ```
 
-## Including Plots
+## 2 x 2 x 2 ANOVA with superior/inferior colliculi, left/right laterality, and neutral/aversive image
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+fullmaskdata$subjects <- as.factor(fullmaskdata$subjects)
+mod <- with(fullmaskdata, aov(fullmaskdata$betas ~ laterality * stimulus_type * superior_inferior + Error(subjects / (laterality * stimulus_type * superior_inferior))))
+ANOVA <- summary(mod)
+ANOVA
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## 2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only
+
+```{r}
+SCdata <- dplyr::filter(fullmaskdata, superior_inferior == 'Superior Colliculi')
+SCdata$subjects <- as.factor(SCdata$subjects)
+mod2 <- with(SCdata, aov(SCdata$betas ~ laterality * stimulus_type  + Error(subjects / (laterality * stimulus_type))))
+ANOVA <- summary(mod2)
+ANOVA
+```
+
+## plots
+
+# SC vs. IC 
+```{r}
+# SC vs. IC plot with other factors averaged across:
+library(dplyr)
+library(ggplot2)
+fullmaskdata %>%
+  group_by(subjects, superior_inferior) %>%
+  summarise(mean_beta = mean(betas)) %>%
+  ggplot(aes(x = superior_inferior, y = mean_beta))+
+  geom_bar(width=0.5, fill='gray',color = 'black',stat = "summary", fun.y = "mean") +
+  geom_hline(yintercept = 0) +
+  geom_errorbar(width=.1, stat="summary", fun.data="mean_se")+
+  scale_colour_grey() +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  labs(y = "beta estimates (arbitrary units)", x = ' ') +
+  theme(axis.title.y = element_text(family="Arial", size=12),
+       axis.text.x = element_text(family="Arial", size=12, color='black'),
+       plot.margin = unit(c(1,5.5,1,5.5),'cm')) +
+  scale_x_discrete(labels=c('Inferior Colliculi' = 'IC', 'Superior Colliculi' = 'SC')) 
+```
+
+# left vs. right activation in the SC
+```{r}
+# left vs. right activation in the SC only, averaged across image categories
+SCdata %>%
+  group_by(subjects, laterality) %>%
+  summarise(mean_beta = mean(betas)) %>%
+  ggplot(aes(x = laterality, y = mean_beta))+
+  geom_bar(width=0.5, fill='gray',color = 'black',stat = "summary", fun.y = "mean") +
+  geom_hline(yintercept = 0) +
+  geom_errorbar(width=.1, stat="summary", fun.data="mean_se")+
+  scale_colour_grey() +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  labs(y = "beta estimates (arbitrary units)", x = ' ') +
+  theme(axis.title.y = element_text(family="Arial", size=12),
+       axis.text.x = element_text(family="Arial", size=12, color='black'),
+       plot.margin = unit(c(1,5.5,1,5.5),'cm')) +
+  scale_x_discrete(labels=c('Left' = 'Left SC', 'Right' = 'Right SC'))
+```
+
+# Neutral vs. Aversive activation in the SC
+```{r}
+# Neutral vs. Aversive activation in the SC, averaged across lateral locations
+SCdata %>%
+  group_by(subjects, stimulus_type) %>%
+  summarise(mean_beta = mean(betas)) %>%
+  ggplot(aes(x = stimulus_type, y = mean_beta))+
+  geom_bar(width=0.5, fill='gray',color = 'black',stat = "summary", fun.y = "mean") +
+  geom_hline(yintercept = 0) +
+  geom_errorbar(width=.1, stat="summary", fun.data="mean_se")+
+  scale_colour_grey() +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  labs(y = "beta estimates (arbitrary units)", x = ' ') +
+  theme(axis.title.y = element_text(family="Arial", size=12),
+       axis.text.x = element_text(family="Arial", size=12, color='black'),
+       plot.margin = unit(c(1,5.5,1,5.5),'cm')) 
+```
+
+## Read the data from Matlab script output after controlling for stimuli visual properties
+
+In the script that produced this output, normed stimuli luminance, complexity, and contrast were added into the model as regressors.
+
+```{r}
+# SC and IC parameter estimates after adding visual property regressors to the model
+visprop <- readMat('Analysis4_fullmaskcolliculi_hd_visprop_output.mat')
+leftICneu <- visprop[[1]][,neu_colnum] # parameter estimates for 11 subjects; left IC neutral
+leftICaver <- visprop[[1]][,aver_colnum]
+leftSCneu <- visprop[[2]][,neu_colnum]
+leftSCaver <- visprop[[2]][,aver_colnum]
+rightICneu <- visprop[[3]][,neu_colnum]
+rightICaver <- visprop[[3]][,aver_colnum]
+rightSCneu <- visprop[[4]][,neu_colnum]
+rightSCaver <- visprop[[4]][,aver_colnum]
+vispropdata <- fullmaskdata # copy the previous dataframe
+vispropdata$betas <- c(leftSCneu,leftSCaver,leftICneu,leftICaver,rightSCneu,rightSCaver,rightICneu,rightICaver) # update the betas in the new dataframe
+```
+
+## 2 x 2 x 2 ANOVA with superior/inferior colliculi, left/right laterality, and neutral/aversive image using parameter estimates obtained after controlling for stimuli visual properties
+
+```{r}
+vispropdata$subjects <- as.factor(vispropdata$subjects)
+mod3 <- with(vispropdata, aov(vispropdata$betas ~ laterality * stimulus_type * superior_inferior + Error(subjects / (laterality * stimulus_type * superior_inferior))))
+ANOVA <- summary(mod3)
+ANOVA
+```
+
+
+## 2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only, using parameter estimates obtained after controlling for stimuli visual properties
+
+```{r}
+vispropSCdata <- dplyr::filter(vispropdata, superior_inferior == 'Superior Colliculi')
+vispropSCdata$subjects <- as.factor(vispropSCdata$subjects)
+mod4 <- with(vispropSCdata, aov(vispropSCdata$betas ~ laterality * stimulus_type  + Error(subjects / (laterality * stimulus_type))))
+ANOVA <- summary(mod4)
+ANOVA
+```
