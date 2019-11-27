@@ -29,7 +29,7 @@ betas <- c(leftSCneu,leftSCaver,leftICneu,leftICaver,rightSCneu,rightSCaver,righ
 subjects <- c(rep(1:11, times = 8))
 laterality <- c(rep('Left', times = 44), rep('Right', times = 44))
 stimulus_type <- c(rep('Neutral', times = 11), rep('Aversive', times = 11), rep('Neutral', times = 11), rep('Aversive', times = 11), rep('Neutral', times = 11), rep('Aversive', times = 11), rep('Neutral', times = 11), rep('Aversive', times = 11))
-superior_inferior <- c(rep('Superior Colliculi', times = 22), rep('Inferior Colliculi', times = 22), rep('Superior Colliculi', times = 22), rep('Inferior Colliculi', times = 22))
+superior_inferior <- c(rep('SC', times = 22), rep('IC', times = 22), rep('SC', times = 22), rep('IC', times = 22))
 fullmaskdata <- data.frame(subjects, betas, laterality, stimulus_type, superior_inferior)
 ```
 
@@ -152,4 +152,15 @@ vispropSCdata$subjects <- as.factor(vispropSCdata$subjects)
 mod4 <- with(vispropSCdata, aov(vispropSCdata$betas ~ laterality * stimulus_type  + Error(subjects / (laterality * stimulus_type))))
 ANOVA <- summary(mod4)
 ANOVA
+```
+
+
+```{r}
+#11/27: reshape data into wide format (clean up this part later)
+# first run R code section 1
+fullmaskdata_wide <- data.frame("SC_left_Aversive" = leftSCaver, "SC_left_Neutral" = leftSCneu, "SC_right_Aversive" = rightSCaver, "SC_right_Neutral" = rightSCneu, "IC_left_Aversive" = leftICaver, "IC_left_Neutral" = leftICneu, "IC_right_Aversive" = rightICaver, "IC_right_Neutral" = rightICneu)
+```
+```{r}
+# next, run the R code section where visprop data is loaded
+vispropdata_wide <- data.frame("SC_left_Aversive" = leftSCaver, "SC_left_Neutral" = leftSCneu, "SC_right_Aversive" = rightSCaver, "SC_right_Neutral" = rightSCneu, "IC_left_Aversive" = leftICaver, "IC_left_Neutral" = leftICneu, "IC_right_Aversive" = rightICaver, "IC_right_Neutral" = rightICneu)
 ```
