@@ -389,7 +389,7 @@ betas &lt;- c(leftSCneu,leftSCaver,leftICneu,leftICaver,rightSCneu,rightSCaver,r
 subjects &lt;- c(rep(1:11, times = 8))
 laterality &lt;- c(rep('Left', times = 44), rep('Right', times = 44))
 stimulus_type &lt;- c(rep('Neutral', times = 11), rep('Aversive', times = 11), rep('Neutral', times = 11), rep('Aversive', times = 11), rep('Neutral', times = 11), rep('Aversive', times = 11), rep('Neutral', times = 11), rep('Aversive', times = 11))
-superior_inferior &lt;- c(rep('Superior Colliculi', times = 22), rep('Inferior Colliculi', times = 22), rep('Superior Colliculi', times = 22), rep('Inferior Colliculi', times = 22))
+superior_inferior &lt;- c(rep('SC', times = 22), rep('IC', times = 22), rep('SC', times = 22), rep('IC', times = 22))
 fullmaskdata &lt;- data.frame(subjects, betas, laterality, stimulus_type, superior_inferior)</code></pre>
 </div>
 <div id="x-2-x-2-anova-with-superiorinferior-colliculi-leftright-laterality-and-neutralaversive-image" class="section level2">
@@ -446,7 +446,7 @@ ANOVA</code></pre>
 </div>
 <div id="x-2-anova-with-leftright-laterality-and-neutralaverive-image-for-sc-activation-only" class="section level2">
 <h2>2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only</h2>
-<pre class="r"><code>SCdata &lt;- dplyr::filter(fullmaskdata, superior_inferior == 'Superior Colliculi')
+<pre class="r"><code>SCdata &lt;- dplyr::filter(fullmaskdata, superior_inferior == 'SC')
 SCdata$subjects &lt;- as.factor(SCdata$subjects)
 mod2 &lt;- with(SCdata, aov(SCdata$betas ~ laterality * stimulus_type  + Error(subjects / (laterality * stimulus_type))))
 ANOVA &lt;- summary(mod2)
@@ -608,7 +608,7 @@ ANOVA</code></pre>
 </div>
 <div id="x-2-anova-with-leftright-laterality-and-neutralaverive-image-for-sc-activation-only-using-parameter-estimates-obtained-after-controlling-for-stimuli-visual-properties" class="section level2">
 <h2>2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only, using parameter estimates obtained after controlling for stimuli visual properties</h2>
-<pre class="r"><code>vispropSCdata &lt;- dplyr::filter(vispropdata, superior_inferior == 'Superior Colliculi')
+<pre class="r"><code>vispropSCdata &lt;- dplyr::filter(vispropdata, superior_inferior == 'SC')
 vispropSCdata$subjects &lt;- as.factor(vispropSCdata$subjects)
 mod4 &lt;- with(vispropSCdata, aov(vispropSCdata$betas ~ laterality * stimulus_type  + Error(subjects / (laterality * stimulus_type))))
 ANOVA &lt;- summary(mod4)

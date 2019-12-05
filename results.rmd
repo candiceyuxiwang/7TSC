@@ -45,7 +45,7 @@ ANOVA
 ## 2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only
 
 ```{r}
-SCdata <- dplyr::filter(fullmaskdata, superior_inferior == 'Superior Colliculi')
+SCdata <- dplyr::filter(fullmaskdata, superior_inferior == 'SC')
 SCdata$subjects <- as.factor(SCdata$subjects)
 mod2 <- with(SCdata, aov(SCdata$betas ~ laterality * stimulus_type  + Error(subjects / (laterality * stimulus_type))))
 ANOVA <- summary(mod2)
@@ -147,20 +147,9 @@ ANOVA
 ## 2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only, using parameter estimates obtained after controlling for stimuli visual properties
 
 ```{r}
-vispropSCdata <- dplyr::filter(vispropdata, superior_inferior == 'Superior Colliculi')
+vispropSCdata <- dplyr::filter(vispropdata, superior_inferior == 'SC')
 vispropSCdata$subjects <- as.factor(vispropSCdata$subjects)
 mod4 <- with(vispropSCdata, aov(vispropSCdata$betas ~ laterality * stimulus_type  + Error(subjects / (laterality * stimulus_type))))
 ANOVA <- summary(mod4)
 ANOVA
-```
-
-
-```{r}
-#11/27: reshape data into wide format (clean up this part later)
-# first run R code section 1
-fullmaskdata_wide <- data.frame("SC_left_Aversive" = leftSCaver, "SC_left_Neutral" = leftSCneu, "SC_right_Aversive" = rightSCaver, "SC_right_Neutral" = rightSCneu, "IC_left_Aversive" = leftICaver, "IC_left_Neutral" = leftICneu, "IC_right_Aversive" = rightICaver, "IC_right_Neutral" = rightICneu)
-```
-```{r}
-# next, run the R code section where visprop data is loaded
-vispropdata_wide <- data.frame("SC_left_Aversive" = leftSCaver, "SC_left_Neutral" = leftSCneu, "SC_right_Aversive" = rightSCaver, "SC_right_Neutral" = rightSCneu, "IC_left_Aversive" = leftICaver, "IC_left_Neutral" = leftICneu, "IC_right_Aversive" = rightICaver, "IC_right_Neutral" = rightICneu)
 ```
