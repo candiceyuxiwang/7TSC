@@ -444,6 +444,28 @@ ANOVA</code></pre>
 ## laterality:stimulus_type:superior_inferior  1    304   303.7   0.134  0.722
 ## Residuals                                  10  22634  2263.4</code></pre>
 </div>
+<div id="paired-t-test-for-sc-vs.ic-activation" class="section level2">
+<h2>Paired t test for SC vs. IC activation</h2>
+<pre class="r"><code>library(dplyr)
+fullmaskdata %&gt;%
+  filter(superior_inferior=='SC') -&gt; SCbetas
+SCbetas &lt;- rowMeans(cbind(SCbetas$betas[1:11],SCbetas$betas[12:22],SCbetas$betas[23:33],SCbetas$betas[34:44]))
+fullmaskdata %&gt;%
+  filter(superior_inferior=='IC') -&gt; ICbetas
+ICbetas &lt;- rowMeans(cbind(ICbetas$betas[1:11],ICbetas$betas[12:22],ICbetas$betas[23:33],ICbetas$betas[34:44]))
+t.test(SCbetas, ICbetas, paired = T)</code></pre>
+<pre><code>## 
+##  Paired t-test
+## 
+## data:  SCbetas and ICbetas
+## t = 5.3361, df = 10, p-value = 0.0003301
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##   82.71923 201.32251
+## sample estimates:
+## mean of the differences 
+##                142.0209</code></pre>
+</div>
 <div id="x-2-anova-with-leftright-laterality-and-neutralaverive-image-for-sc-activation-only" class="section level2">
 <h2>2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only</h2>
 <pre class="r"><code>SCdata &lt;- dplyr::filter(fullmaskdata, superior_inferior == 'SC')
@@ -475,8 +497,29 @@ ANOVA</code></pre>
 ## laterality:stimulus_type  1   1851    1851   0.527  0.484
 ## Residuals                10  35123    3512</code></pre>
 </div>
+<div id="paired-t-test-for-sc-activation-in-aversive-vs.neutral-conditions" class="section level1">
+<h1>Paired t test for SC activation in aversive vs. neutral conditions</h1>
+<pre class="r"><code>SCdata %&gt;%
+  filter(stimulus_type == 'Neutral') -&gt; SCneu
+SCneubetas &lt;- rowMeans(cbind(SCneu$betas[1:11],SCneu$betas[12:22]))
+SCdata %&gt;%
+  filter(stimulus_type == 'Aversive') -&gt; SCave
+SCavebetas &lt;- rowMeans(cbind(SCave$betas[1:11],SCave$betas[12:22]))
+t.test(SCavebetas, SCneubetas, paired = T)</code></pre>
+<pre><code>## 
+##  Paired t-test
+## 
+## data:  SCavebetas and SCneubetas
+## t = 2.2889, df = 10, p-value = 0.0451
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##    2.742555 203.883016
+## sample estimates:
+## mean of the differences 
+##                103.3128</code></pre>
 <div id="plots" class="section level2">
 <h2>plots</h2>
+</div>
 </div>
 <div id="sc-vs.ic" class="section level1">
 <h1>SC vs. IC</h1>
@@ -635,6 +678,27 @@ ANOVA</code></pre>
 ## laterality:stimulus_type  1    843   842.5    0.28  0.608
 ## Residuals                10  30125  3012.5</code></pre>
 </div>
+</div>
+<div id="paired-t-test-for-sc-activation-in-aversive-vs.neutral-conditions-after-controlling-for-stimuli-visual-properties" class="section level1">
+<h1>Paired t test for SC activation in aversive vs. neutral conditions after controlling for stimuli visual properties</h1>
+<pre class="r"><code>vispropSCdata %&gt;%
+  filter(stimulus_type == 'Neutral') -&gt; vispropSCneu
+vispropSCneubetas &lt;- rowMeans(cbind(vispropSCneu$betas[1:11],vispropSCneu$betas[12:22]))
+vispropSCdata %&gt;%
+  filter(stimulus_type == 'Aversive') -&gt; vispropSCave
+vispropSCavebetas &lt;- rowMeans(cbind(vispropSCave$betas[1:11],vispropSCave$betas[12:22]))
+t.test(vispropSCavebetas, vispropSCneubetas, paired = T)</code></pre>
+<pre><code>## 
+##  Paired t-test
+## 
+## data:  vispropSCavebetas and vispropSCneubetas
+## t = 2.1351, df = 10, p-value = 0.05851
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##   -4.401292 206.438465
+## sample estimates:
+## mean of the differences 
+##                101.0186</code></pre>
 </div>
 
 
