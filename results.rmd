@@ -80,7 +80,7 @@ cat('laterality by colliculi location partial eta squared:', laterality_SCIC_int
 
 ```
 
-## Paired t test for SC vs. IC activation
+Follow-up paired t test for SC vs. IC activation
 
 ```{r}
 library(dplyr)
@@ -93,19 +93,10 @@ ICbetas <- rowMeans(cbind(ICbetas$betas[1:11],ICbetas$betas[12:22],ICbetas$betas
 t.test(SCbetas, ICbetas, paired = T)
 ```
 
-## 2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only
+Follow-up paired t test for SC activation in aversive vs. neutral conditions
 
 ```{r}
-SCdata <- dplyr::filter(fullmaskdata, superior_inferior == 'SC')
-SCdata$subjects <- as.factor(SCdata$subjects)
-mod2 <- with(SCdata, aov(SCdata$betas ~ laterality * stimulus_type  + Error(subjects / (laterality * stimulus_type))))
-ANOVA <- summary(mod2)
-ANOVA
-```
-
-# Paired t test for SC activation in aversive vs. neutral conditions
-
-```{r}
+SCdata <- filter(fullmaskdata, superior_inferior == 'SC')
 SCdata %>%
   filter(stimulus_type == 'Neutral') -> SCneu
 SCneubetas <- rowMeans(cbind(SCneu$betas[1:11],SCneu$betas[12:22]))
@@ -115,7 +106,7 @@ SCavebetas <- rowMeans(cbind(SCave$betas[1:11],SCave$betas[12:22]))
 t.test(SCavebetas, SCneubetas, paired = T)
 ```
 
-follow up t test for IC activation in aversive vs. neutral conditions
+Follow-up paired t test for IC activation in aversive vs. neutral conditions
 
 ```{r}
 fullmaskdata %>%
@@ -239,27 +230,4 @@ stimulus_type_resid_sumsq <- ANOVA$`Error: subjects:stimulus_type`[[1]][[2]][2]
 stimulus_type_pes <- stimulus_type_sumsq/(stimulus_type_sumsq + stimulus_type_resid_sumsq)
 
 sprintf('Estimated effect size (partial eta squared) is %f for superior vs. inferior colliculi main effect, %f for laterality main effect, %f for stimulus category main effect.', superior_inferior_pes, laterality_pes, stimulus_type_pes)
-```
-
-
-## 2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only, using parameter estimates obtained after controlling for stimuli visual properties
-
-```{r}
-vispropSCdata <- dplyr::filter(vispropdata, superior_inferior == 'SC')
-vispropSCdata$subjects <- as.factor(vispropSCdata$subjects)
-mod4 <- with(vispropSCdata, aov(vispropSCdata$betas ~ laterality * stimulus_type  + Error(subjects / (laterality * stimulus_type))))
-ANOVA <- summary(mod4)
-ANOVA
-```
-
-# Paired t test for SC activation in aversive vs. neutral conditions after controlling for stimuli visual properties
-
-```{r}
-vispropSCdata %>%
-  filter(stimulus_type == 'Neutral') -> vispropSCneu
-vispropSCneubetas <- rowMeans(cbind(vispropSCneu$betas[1:11],vispropSCneu$betas[12:22]))
-vispropSCdata %>%
-  filter(stimulus_type == 'Aversive') -> vispropSCave
-vispropSCavebetas <- rowMeans(cbind(vispropSCave$betas[1:11],vispropSCave$betas[12:22]))
-t.test(vispropSCavebetas, vispropSCneubetas, paired = T)
 ```

@@ -443,9 +443,38 @@ ANOVA</code></pre>
 ##                                            Df Sum Sq Mean Sq F value Pr(&gt;F)
 ## laterality:stimulus_type:superior_inferior  1    304   303.7   0.134  0.722
 ## Residuals                                  10  22634  2263.4</code></pre>
-</div>
-<div id="paired-t-test-for-sc-vs.ic-activation" class="section level2">
-<h2>Paired t test for SC vs. IC activation</h2>
+<p>Significant main effects of SC/IC, lateral location, and stimulus type (aversive vs. neutral). Calculate estimated effect size (partial eta squared) for each main effect:</p>
+<pre class="r"><code># superior vs. inferior colliculi
+superior_inferior_sumsq &lt;- ANOVA$`Error: subjects:superior_inferior`[[1]][[2]][1]
+superior_inferior_resid_sumsq &lt;- ANOVA$`Error: subjects:superior_inferior`[[1]][[2]][2]
+superior_inferior_pes &lt;- superior_inferior_sumsq/(superior_inferior_sumsq + superior_inferior_resid_sumsq)
+
+# left vs. right colliculi 
+laterality_sumsq &lt;- ANOVA$`Error: subjects:laterality`[[1]][[2]][1]
+laterality_resid_sumsq &lt;- ANOVA$`Error: subjects:laterality`[[1]][[2]][2]
+laterality_pes &lt;- laterality_sumsq/(laterality_sumsq + laterality_resid_sumsq)
+
+# aversive vs. neutral stimuli category
+stimulus_type_sumsq &lt;- ANOVA$`Error: subjects:stimulus_type`[[1]][[2]][1]
+stimulus_type_resid_sumsq &lt;- ANOVA$`Error: subjects:stimulus_type`[[1]][[2]][2]
+stimulus_type_pes &lt;- stimulus_type_sumsq/(stimulus_type_sumsq + stimulus_type_resid_sumsq)
+
+sprintf('Estimated effect size (partial eta squared) is %f for superior vs. inferior colliculi main effect, %f for laterality main effect, %f for stimulus category main effect.', superior_inferior_pes, laterality_pes, stimulus_type_pes)</code></pre>
+<pre><code>## [1] &quot;Estimated effect size (partial eta squared) is 0.740087 for superior vs. inferior colliculi main effect, 0.620072 for laterality main effect, 0.531061 for stimulus category main effect.&quot;</code></pre>
+<p>Effect size estimation for interactions:</p>
+<pre class="r"><code># colliculi location by stimulus type
+SCIC_stim_type_interaction_pes &lt;- ANOVA$`Error: subjects:stimulus_type:superior_inferior`[[1]][[2]][1]/(ANOVA$`Error: subjects:stimulus_type:superior_inferior`[[1]][[2]][1] + ANOVA$`Error: subjects:stimulus_type:superior_inferior`[[1]][[2]][2])
+cat('colliculi location by stimulus type partial eta squared:', SCIC_stim_type_interaction_pes,'\n')</code></pre>
+<pre><code>## colliculi location by stimulus type partial eta squared: 0.03751119</code></pre>
+<pre class="r"><code># laterality by stimulus type
+laterality_stim_type_interaction_pes &lt;- ANOVA$`Error: subjects:laterality:stimulus_type`[[1]][[2]][1]/(ANOVA$`Error: subjects:laterality:stimulus_type`[[1]][[2]][1] + ANOVA$`Error: subjects:laterality:stimulus_type`[[1]][[2]][2])
+cat('laterality by stimulus type partial eta squared:', laterality_stim_type_interaction_pes,'\n')</code></pre>
+<pre><code>## laterality by stimulus type partial eta squared: 0.080967</code></pre>
+<pre class="r"><code># laterality by colliculi location
+laterality_SCIC_interaction_pes &lt;- ANOVA$`Error: subjects:laterality:superior_inferior`[[1]][[2]][1]/(ANOVA$`Error: subjects:laterality:superior_inferior`[[1]][[2]][1] + ANOVA$`Error: subjects:laterality:superior_inferior`[[1]][[2]][2])
+cat('laterality by colliculi location partial eta squared:', laterality_SCIC_interaction_pes,'\n')</code></pre>
+<pre><code>## laterality by colliculi location partial eta squared: 0.01214596</code></pre>
+<p>Follow-up paired t test for SC vs. IC activation</p>
 <pre class="r"><code>library(dplyr)
 fullmaskdata %&gt;%
   filter(superior_inferior=='SC') -&gt; SCbetas
@@ -465,41 +494,9 @@ t.test(SCbetas, ICbetas, paired = T)</code></pre>
 ## sample estimates:
 ## mean of the differences 
 ##                142.0209</code></pre>
-</div>
-<div id="x-2-anova-with-leftright-laterality-and-neutralaverive-image-for-sc-activation-only" class="section level2">
-<h2>2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only</h2>
-<pre class="r"><code>SCdata &lt;- dplyr::filter(fullmaskdata, superior_inferior == 'SC')
-SCdata$subjects &lt;- as.factor(SCdata$subjects)
-mod2 &lt;- with(SCdata, aov(SCdata$betas ~ laterality * stimulus_type  + Error(subjects / (laterality * stimulus_type))))
-ANOVA &lt;- summary(mod2)
-ANOVA</code></pre>
-<pre><code>## 
-## Error: subjects
-##           Df Sum Sq Mean Sq F value Pr(&gt;F)
-## Residuals 10 152624   15262               
-## 
-## Error: subjects:laterality
-##            Df Sum Sq Mean Sq F value  Pr(&gt;F)   
-## laterality  1  26470   26470    16.5 0.00228 **
-## Residuals  10  16037    1604                   
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Error: subjects:stimulus_type
-##               Df Sum Sq Mean Sq F value Pr(&gt;F)  
-## stimulus_type  1 117409  117409   5.239 0.0451 *
-## Residuals     10 224103   22410                 
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Error: subjects:laterality:stimulus_type
-##                          Df Sum Sq Mean Sq F value Pr(&gt;F)
-## laterality:stimulus_type  1   1851    1851   0.527  0.484
-## Residuals                10  35123    3512</code></pre>
-</div>
-<div id="paired-t-test-for-sc-activation-in-aversive-vs.neutral-conditions" class="section level1">
-<h1>Paired t test for SC activation in aversive vs. neutral conditions</h1>
-<pre class="r"><code>SCdata %&gt;%
+<p>Follow-up paired t test for SC activation in aversive vs. neutral conditions</p>
+<pre class="r"><code>SCdata &lt;- filter(fullmaskdata, superior_inferior == 'SC')
+SCdata %&gt;%
   filter(stimulus_type == 'Neutral') -&gt; SCneu
 SCneubetas &lt;- rowMeans(cbind(SCneu$betas[1:11],SCneu$betas[12:22]))
 SCdata %&gt;%
@@ -517,9 +514,30 @@ t.test(SCavebetas, SCneubetas, paired = T)</code></pre>
 ## sample estimates:
 ## mean of the differences 
 ##                103.3128</code></pre>
+<p>Follow-up paired t test for IC activation in aversive vs. neutral conditions</p>
+<pre class="r"><code>fullmaskdata %&gt;%
+  filter(superior_inferior == 'IC') -&gt; ICdata
+ICdata %&gt;%
+  filter(stimulus_type == 'Neutral') -&gt; ICneu
+ICneubetas &lt;- rowMeans(cbind(ICneu$betas[1:11],ICneu$betas[12:22]))
+ICdata %&gt;%
+  filter(stimulus_type == 'Aversive') -&gt; ICave
+ICavebetas &lt;- rowMeans(cbind(ICave$betas[1:11],ICave$betas[12:22]))
+t.test(ICavebetas, ICneubetas, paired = T)</code></pre>
+<pre><code>## 
+##  Paired t-test
+## 
+## data:  ICavebetas and ICneubetas
+## t = 1.4193, df = 10, p-value = 0.1862
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -33.32542 150.27747
+## sample estimates:
+## mean of the differences 
+##                58.47602</code></pre>
+</div>
 <div id="plots" class="section level2">
 <h2>plots</h2>
-</div>
 </div>
 <div id="sc-vs.ic" class="section level1">
 <h1>SC vs. IC</h1>
@@ -648,57 +666,25 @@ ANOVA</code></pre>
 ##                                            Df Sum Sq Mean Sq F value Pr(&gt;F)
 ## laterality:stimulus_type:superior_inferior  1    461     461   0.117  0.739
 ## Residuals                                  10  39426    3943</code></pre>
+<p>Significant main effects of stimulus type and colliculi location. Laterality effect attenuated. Effect size estimation for main effects:</p>
+<pre class="r"><code># superior vs. inferior colliculi
+superior_inferior_sumsq &lt;- ANOVA$`Error: subjects:superior_inferior`[[1]][[2]][1]
+superior_inferior_resid_sumsq &lt;- ANOVA$`Error: subjects:superior_inferior`[[1]][[2]][2]
+superior_inferior_pes &lt;- superior_inferior_sumsq/(superior_inferior_sumsq + superior_inferior_resid_sumsq)
+
+# left vs. right colliculi 
+laterality_sumsq &lt;- ANOVA$`Error: subjects:laterality`[[1]][[2]][1]
+laterality_resid_sumsq &lt;- ANOVA$`Error: subjects:laterality`[[1]][[2]][2]
+laterality_pes &lt;- laterality_sumsq/(laterality_sumsq + laterality_resid_sumsq)
+
+# aversive vs. neutral stimuli category
+stimulus_type_sumsq &lt;- ANOVA$`Error: subjects:stimulus_type`[[1]][[2]][1]
+stimulus_type_resid_sumsq &lt;- ANOVA$`Error: subjects:stimulus_type`[[1]][[2]][2]
+stimulus_type_pes &lt;- stimulus_type_sumsq/(stimulus_type_sumsq + stimulus_type_resid_sumsq)
+
+sprintf('Estimated effect size (partial eta squared) is %f for superior vs. inferior colliculi main effect, %f for laterality main effect, %f for stimulus category main effect.', superior_inferior_pes, laterality_pes, stimulus_type_pes)</code></pre>
+<pre><code>## [1] &quot;Estimated effect size (partial eta squared) is 0.592803 for superior vs. inferior colliculi main effect, 0.299200 for laterality main effect, 0.350909 for stimulus category main effect.&quot;</code></pre>
 </div>
-<div id="x-2-anova-with-leftright-laterality-and-neutralaverive-image-for-sc-activation-only-using-parameter-estimates-obtained-after-controlling-for-stimuli-visual-properties" class="section level2">
-<h2>2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only, using parameter estimates obtained after controlling for stimuli visual properties</h2>
-<pre class="r"><code>vispropSCdata &lt;- dplyr::filter(vispropdata, superior_inferior == 'SC')
-vispropSCdata$subjects &lt;- as.factor(vispropSCdata$subjects)
-mod4 &lt;- with(vispropSCdata, aov(vispropSCdata$betas ~ laterality * stimulus_type  + Error(subjects / (laterality * stimulus_type))))
-ANOVA &lt;- summary(mod4)
-ANOVA</code></pre>
-<pre><code>## 
-## Error: subjects
-##           Df Sum Sq Mean Sq F value Pr(&gt;F)
-## Residuals 10 219842   21984               
-## 
-## Error: subjects:laterality
-##            Df Sum Sq Mean Sq F value Pr(&gt;F)
-## laterality  1   3879    3879   0.471  0.508
-## Residuals  10  82385    8238               
-## 
-## Error: subjects:stimulus_type
-##               Df Sum Sq Mean Sq F value Pr(&gt;F)  
-## stimulus_type  1 112252  112252   4.559 0.0585 .
-## Residuals     10 246237   24624                 
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Error: subjects:laterality:stimulus_type
-##                          Df Sum Sq Mean Sq F value Pr(&gt;F)
-## laterality:stimulus_type  1    843   842.5    0.28  0.608
-## Residuals                10  30125  3012.5</code></pre>
-</div>
-</div>
-<div id="paired-t-test-for-sc-activation-in-aversive-vs.neutral-conditions-after-controlling-for-stimuli-visual-properties" class="section level1">
-<h1>Paired t test for SC activation in aversive vs. neutral conditions after controlling for stimuli visual properties</h1>
-<pre class="r"><code>vispropSCdata %&gt;%
-  filter(stimulus_type == 'Neutral') -&gt; vispropSCneu
-vispropSCneubetas &lt;- rowMeans(cbind(vispropSCneu$betas[1:11],vispropSCneu$betas[12:22]))
-vispropSCdata %&gt;%
-  filter(stimulus_type == 'Aversive') -&gt; vispropSCave
-vispropSCavebetas &lt;- rowMeans(cbind(vispropSCave$betas[1:11],vispropSCave$betas[12:22]))
-t.test(vispropSCavebetas, vispropSCneubetas, paired = T)</code></pre>
-<pre><code>## 
-##  Paired t-test
-## 
-## data:  vispropSCavebetas and vispropSCneubetas
-## t = 2.1351, df = 10, p-value = 0.05851
-## alternative hypothesis: true difference in means is not equal to 0
-## 95 percent confidence interval:
-##   -4.401292 206.438465
-## sample estimates:
-## mean of the differences 
-##                101.0186</code></pre>
 </div>
 
 
