@@ -42,6 +42,44 @@ ANOVA <- summary(mod)
 ANOVA
 ```
 
+Significant main effects of SC/IC, lateral location, and stimulus type (aversive vs. neutral).
+Calculate estimated effect size (partial eta squared) for each main effect:
+```{r}
+# superior vs. inferior colliculi
+superior_inferior_sumsq <- ANOVA$`Error: subjects:superior_inferior`[[1]][[2]][1]
+superior_inferior_resid_sumsq <- ANOVA$`Error: subjects:superior_inferior`[[1]][[2]][2]
+superior_inferior_pes <- superior_inferior_sumsq/(superior_inferior_sumsq + superior_inferior_resid_sumsq)
+
+# left vs. right colliculi 
+laterality_sumsq <- ANOVA$`Error: subjects:laterality`[[1]][[2]][1]
+laterality_resid_sumsq <- ANOVA$`Error: subjects:laterality`[[1]][[2]][2]
+laterality_pes <- laterality_sumsq/(laterality_sumsq + laterality_resid_sumsq)
+
+# aversive vs. neutral stimuli category
+stimulus_type_sumsq <- ANOVA$`Error: subjects:stimulus_type`[[1]][[2]][1]
+stimulus_type_resid_sumsq <- ANOVA$`Error: subjects:stimulus_type`[[1]][[2]][2]
+stimulus_type_pes <- stimulus_type_sumsq/(stimulus_type_sumsq + stimulus_type_resid_sumsq)
+
+sprintf('Estimated effect size (partial eta squared) is %f for superior vs. inferior colliculi main effect, %f for laterality main effect, %f for stimulus category main effect.', superior_inferior_pes, laterality_pes, stimulus_type_pes)
+```
+
+Effect size estimation for interactions:
+
+```{r}
+# colliculi location by stimulus type
+SCIC_stim_type_interaction_pes <- ANOVA$`Error: subjects:stimulus_type:superior_inferior`[[1]][[2]][1]/(ANOVA$`Error: subjects:stimulus_type:superior_inferior`[[1]][[2]][1] + ANOVA$`Error: subjects:stimulus_type:superior_inferior`[[1]][[2]][2])
+cat('colliculi location by stimulus type partial eta squared:', SCIC_stim_type_interaction_pes,'\n')
+
+# laterality by stimulus type
+laterality_stim_type_interaction_pes <- ANOVA$`Error: subjects:laterality:stimulus_type`[[1]][[2]][1]/(ANOVA$`Error: subjects:laterality:stimulus_type`[[1]][[2]][1] + ANOVA$`Error: subjects:laterality:stimulus_type`[[1]][[2]][2])
+cat('laterality by stimulus type partial eta squared:', laterality_stim_type_interaction_pes,'\n')
+
+# laterality by colliculi location
+laterality_SCIC_interaction_pes <- ANOVA$`Error: subjects:laterality:superior_inferior`[[1]][[2]][1]/(ANOVA$`Error: subjects:laterality:superior_inferior`[[1]][[2]][1] + ANOVA$`Error: subjects:laterality:superior_inferior`[[1]][[2]][2])
+cat('laterality by colliculi location partial eta squared:', laterality_SCIC_interaction_pes,'\n')
+
+```
+
 ## Paired t test for SC vs. IC activation
 
 ```{r}
@@ -75,6 +113,20 @@ SCdata %>%
   filter(stimulus_type == 'Aversive') -> SCave
 SCavebetas <- rowMeans(cbind(SCave$betas[1:11],SCave$betas[12:22]))
 t.test(SCavebetas, SCneubetas, paired = T)
+```
+
+follow up t test for IC activation in aversive vs. neutral conditions
+
+```{r}
+fullmaskdata %>%
+  filter(superior_inferior == 'IC') -> ICdata
+ICdata %>%
+  filter(stimulus_type == 'Neutral') -> ICneu
+ICneubetas <- rowMeans(cbind(ICneu$betas[1:11],ICneu$betas[12:22]))
+ICdata %>%
+  filter(stimulus_type == 'Aversive') -> ICave
+ICavebetas <- rowMeans(cbind(ICave$betas[1:11],ICave$betas[12:22]))
+t.test(ICavebetas, ICneubetas, paired = T)
 ```
 
 ## plots
@@ -166,6 +218,27 @@ vispropdata$subjects <- as.factor(vispropdata$subjects)
 mod3 <- with(vispropdata, aov(vispropdata$betas ~ laterality * stimulus_type * superior_inferior + Error(subjects / (laterality * stimulus_type * superior_inferior))))
 ANOVA <- summary(mod3)
 ANOVA
+```
+
+Significant main effects of stimulus type and colliculi location. Laterality effect attenuated.
+Effect size estimation for main effects:
+```{r}
+# superior vs. inferior colliculi
+superior_inferior_sumsq <- ANOVA$`Error: subjects:superior_inferior`[[1]][[2]][1]
+superior_inferior_resid_sumsq <- ANOVA$`Error: subjects:superior_inferior`[[1]][[2]][2]
+superior_inferior_pes <- superior_inferior_sumsq/(superior_inferior_sumsq + superior_inferior_resid_sumsq)
+
+# left vs. right colliculi 
+laterality_sumsq <- ANOVA$`Error: subjects:laterality`[[1]][[2]][1]
+laterality_resid_sumsq <- ANOVA$`Error: subjects:laterality`[[1]][[2]][2]
+laterality_pes <- laterality_sumsq/(laterality_sumsq + laterality_resid_sumsq)
+
+# aversive vs. neutral stimuli category
+stimulus_type_sumsq <- ANOVA$`Error: subjects:stimulus_type`[[1]][[2]][1]
+stimulus_type_resid_sumsq <- ANOVA$`Error: subjects:stimulus_type`[[1]][[2]][2]
+stimulus_type_pes <- stimulus_type_sumsq/(stimulus_type_sumsq + stimulus_type_resid_sumsq)
+
+sprintf('Estimated effect size (partial eta squared) is %f for superior vs. inferior colliculi main effect, %f for laterality main effect, %f for stimulus category main effect.', superior_inferior_pes, laterality_pes, stimulus_type_pes)
 ```
 
 
