@@ -36,10 +36,15 @@ fullmaskdata <- data.frame(subjects, betas, laterality, stimulus_type, superior_
 ## 2 x 2 x 2 ANOVA with superior/inferior colliculi, left/right laterality, and neutral/aversive image
 
 ```{r}
-fullmaskdata$subjects <- as.factor(fullmaskdata$subjects)
-mod <- with(fullmaskdata, aov(fullmaskdata$betas ~ laterality * stimulus_type * superior_inferior + Error(subjects / (laterality * stimulus_type * superior_inferior))))
-ANOVA <- summary(mod)
-ANOVA
+#fullmaskdata$subjects <- as.factor(fullmaskdata$subjects)
+#mod <- with(fullmaskdata, aov(fullmaskdata$betas ~ laterality * stimulus_type * superior_inferior + Error(subjects / (laterality * stimulus_type * superior_inferior))))
+#ANOVA <- summary(mod)
+#ANOVA
+
+# easier to read output using afex package
+library(afex)
+aov_ez(id = 'subjects', dv = 'betas', data = fullmaskdata, within = c('laterality','stimulus_type','superior_inferior'))
+
 ```
 
 Significant main effects of SC/IC, lateral location, and stimulus type (aversive vs. neutral).
