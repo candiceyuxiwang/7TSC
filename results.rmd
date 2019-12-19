@@ -46,6 +46,15 @@ ICbetas <- rowMeans(cbind(ICbetas$betas[1:11],ICbetas$betas[12:22],ICbetas$betas
 t.test(SCbetas, ICbetas, paired = T)
 ```
 
+##### Cohen's dz for within-subject design:
+
+```{r}
+t = 5.3361
+n = 11
+d_z = t/sqrt(n)
+d_z
+```
+
 ### Two-tailed paired t test for SC activation in aversive vs. neutral conditions
 
 ```{r}
@@ -57,6 +66,15 @@ SCdata %>%
   filter(stimulus_type == 'Aversive') -> SCave
 SCavebetas <- rowMeans(cbind(SCave$betas[1:11],SCave$betas[12:22]))
 t.test(SCavebetas, SCneubetas, paired = T)
+```
+
+##### Cohen's dz for within-subject design:
+
+```{r}
+t = 2.2889
+n = 11
+d_z = t/sqrt(n)
+d_z
 ```
 
 ### 2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only
@@ -178,6 +196,15 @@ vispropSCdata %>%
   filter(stimulus_type == 'Aversive') -> vispropSCave
 vispropSCavebetas <- rowMeans(cbind(vispropSCave$betas[1:11],vispropSCave$betas[12:22]))
 t.test(vispropSCavebetas, vispropSCneubetas, paired = T)
+```
+
+##### Cohen's dz for within-subject design:
+
+```{r}
+t = 2.1351
+n = 11
+d_z = t/sqrt(n)
+d_z
 ```
 
 ### 2 x 2 ANOVA with left/right laterality and neutral/averive image for SC activation only, using parameter estimates obtained after controlling for stimuli visual properties
